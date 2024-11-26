@@ -4,8 +4,6 @@ export async function getConfigAddresses(hostName, cleanIPs, enableIPv6) {
     const resolved = await resolveDNS(hostName);
     const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : []
     return [
-        hostName,
-        'www.speedtest.net',
         ...resolved.ipv4,
         ...defaultIPv6,
         ...(cleanIPs ? cleanIPs.split(',') : [])
