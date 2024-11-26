@@ -33,6 +33,7 @@ export async function getConfigAddresses(hostName, cleanIPs, enableIPv6) {
     }
 
     return [
+        'cf.090227.xyz',
         'speed.marisalnc.com',
         'shopify.com',
         ...resolved.ipv4,
