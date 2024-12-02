@@ -1,14 +1,45 @@
 import { resolveDNS, isDomain } from '../helpers/helpers';
 
+//export async function getConfigAddresses(cleanIPs, enableIPv6) {
+//    const resolved = await resolveDNS(globalThis.hostName);
+//    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : []
+//    return [
+//        globalThis.hostName,
+//        'www.speedtest.net',
+//        ...resolved.ipv4,
+//        ...defaultIPv6,
+//        ...(cleanIPs ? cleanIPs.split(',') : [])
+//    ];
+//}
+
 export async function getConfigAddresses(cleanIPs, enableIPv6) {
     const resolved = await resolveDNS(globalThis.hostName);
-    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : []
+    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : [];
+
+    // 如果 cleanIPs 是 URL，需要先下载内容
+    let ipList = [];
+    if (cleanIPs && cleanIPs.startsWith('http')) {
+        const response = await fetch(cleanIPs);
+        if (response.ok) {
+            const data = await response.text();
+            // 处理逗号或换行符分隔的 IP 列表
+            ipList = data.split(/[\n,]/).map(ip => ip.trim()).filter(ip => ip);
+        } else {
+            console.error('Failed to fetch IP list from URL:', cleanIPs);
+        }
+    } else {
+        // 直接处理传入的 IP 列表，支持逗号或换行符
+        ipList = cleanIPs ? cleanIPs.split(/[\n,]/).map(ip => ip.trim()).filter(ip => ip) : [];
+    }
+
+
     return [
-        globalThis.hostName,
-        'www.speedtest.net',
+        'cf.090227.xyz',
+        'speed.marisalnc.com',
+        'shopify.com',
         ...resolved.ipv4,
         ...defaultIPv6,
-        ...(cleanIPs ? cleanIPs.split(',') : [])
+        ...ipList
     ];
 }
 

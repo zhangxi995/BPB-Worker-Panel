@@ -1213,6 +1213,16 @@ export async function renderHomePage (proxySettings, isPassSet) {
             const invalidIPs = [...cleanIPs, ...proxyIPs, ...customCdnAddrs, ...customBypassRules, ...customBlockRules, customCdnHost, customCdnSni]?.filter(value => {
                 if (value) {
                     const trimmedValue = value.trim();
+
+                    // 如果 cleanIPs 是一个链接，跳过校验
+                    if (Array.isArray(cleanIPs) && cleanIPs.includes(value)) {
+                        try {
+                            new URL(value);  // 尝试将值作为 URL 解析，如果成功，表示它是一个链接
+                            return false;  // 如果是链接，跳过校验
+                        } catch (e) {
+                            // 如果不是有效的 URL，则继续校验
+                        }
+                    }
                     return !validIPDomain.test(trimmedValue);
                 }
             });
