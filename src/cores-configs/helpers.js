@@ -1,16 +1,62 @@
 import { resolveDNS, isDomain } from '../helpers/helpers';
 
+//export async function getConfigAddresses(cleanIPs, enableIPv6) {
+//    const resolved = await resolveDNS(globalThis.hostName);
+//    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : []
+//    return [
+//        globalThis.hostName,
+//        'www.speedtest.net',
+//        ...resolved.ipv4,
+//        ...defaultIPv6,
+//        ...(cleanIPs ? cleanIPs.split(',') : [])
+//    ];
+//}
+
 export async function getConfigAddresses(cleanIPs, enableIPv6) {
     const resolved = await resolveDNS(globalThis.hostName);
-    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : []
+    const defaultIPv6 = enableIPv6 ? resolved.ipv6.map((ip) => `[${ip}]`) : [];
+
+    // 如果 cleanIPs 是 URL，需要先下载内容
+    let ipList = [];
+    if (cleanIPs && cleanIPs.startsWith('http')) {
+        try {
+            const response = await fetch(cleanIPs);
+            if (response.ok) {
+                const data = await response.text();
+                // 处理逗号或换行符分隔的 IP 列表，去掉冒号及其后内容，过滤空行和空白字符
+                ipList = data
+                    .split(/[\n,]/)                // 按换行或逗号分隔
+                    .map(ip => ip.split(':')[0])   // 去掉冒号及其后内容
+                    .map(ip => ip.trim())          // 去掉首尾空格
+                    .filter(ip => ip);             // 过滤空值和空行
+            } else {
+                console.error('Failed to fetch IP list from URL:', cleanIPs);
+            }
+        } catch (error) {
+            console.error('Error fetching IP list:', error);
+        }
+    } else {
+        // 直接处理传入的 IP 列表，支持逗号或换行符
+        ipList = cleanIPs
+            ? cleanIPs
+                .split(/[\n,]/)               // 按换行或逗号分隔
+                .map(ip => ip.split(':')[0])  // 去掉冒号及其后内容
+                .map(ip => ip.trim())         // 去掉首尾空格
+                .filter(ip => ip)             // 过滤空值和空行
+            : [];
+    }
+
+    // 返回拼接后的完整地址列表
     return [
-        globalThis.hostName,
-        'www.speedtest.net',
+        'cf.090227.xyz',
+        'speed.marisalnc.com',
+        'shopify.com',
         ...resolved.ipv4,
         ...defaultIPv6,
-        ...(cleanIPs ? cleanIPs.split(',') : [])
+        ...ipList
     ];
 }
+
 
 export function extractWireguardParams(warpConfigs, isWoW) {
     const index = isWoW ? 1 : 0;

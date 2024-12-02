@@ -56,11 +56,71 @@ export async function handlePanel(request, env) {
 }
 
 export async function fallback(request) {
-    const url = new URL(request.url);
-    url.hostname = 'speed.cloudflare.com';
-    url.protocol = 'https:';
-    request = new Request(url, request);
-    return await fetch(request);
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>404 - Page Not Found</title>
+            <style>
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                body {
+                    font-family: 'Arial', sans-serif;
+                    height: 100vh;
+                    background: #f4f4f4; /* 灰色背景 */
+                    display: flex;
+                    justify-content: center; /* 水平居中 */
+                    align-items: center; /* 垂直居中 */
+                    flex-direction: column;
+                    padding: 20px;
+                    color: #333;
+                    overflow: hidden;
+                }
+                .container {
+                    text-align: center;
+                }
+                h1 {
+                    font-size: 100px;
+                    font-weight: bold;
+                    color: #007bff; /* 蓝色 */
+                    margin: 0;
+                }
+                p {
+                    font-size: 18px;
+                    color: #555; /* 深灰色 */
+                    margin-top: 10px;
+                }
+                a {
+                    font-size: 18px;
+                    color: #007bff; /* 蓝色链接 */
+                    text-decoration: none;
+                    margin-top: 20px;
+                    display: inline-block;
+                }
+                a:hover {
+                    text-decoration: underline;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>404</h1>
+                <p>Oops! The page you are looking for doesn't exist.</p>
+                <a href="/">Go back to Home</a>
+            </div>
+        </body>
+        </html>
+    `;
+
+    return new Response(htmlContent, {
+        status: 404,
+        headers: { 'Content-Type': 'text/html' }
+    });
 }
 
 export async function getMyIP(request) {
